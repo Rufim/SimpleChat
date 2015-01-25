@@ -3,6 +3,11 @@ package com.simplechat.client.adapter;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +20,8 @@ import com.simplechat.client.domain.ChatMessage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by Rufim on 24.01.2015.
@@ -64,13 +71,39 @@ public class ChatAdapter extends ArrayAdapter {
         ChatMessage chatMessageObj = getItem(position);
         chatText = (TextView) row.findViewById(R.id.singleMessage);
         if (chatMessageObj.user == null) {
-            chatText.setText(chatMessageObj.message);
+            chatText.setText(colorifyHashtags(chatMessageObj.message));
         } else {
-            chatText.setText(chatMessageObj.user + ": " + chatMessageObj.message);
+            chatText.setText(chatMessageObj.user + ": ");
+            chatText.append(colorifyHashtags(chatMessageObj.message));
         }
         chatText.setBackgroundResource(chatMessageObj.left ? R.drawable.bubble_a : R.drawable.bubble_b);
         singleMessageContainer.setGravity(chatMessageObj.left ? Gravity.LEFT : Gravity.RIGHT);
         return row;
+    }
+
+    private SpannableStringBuilder colorifyHashtags (String message){
+        Pattern pattern = Pattern.compile("(^|\\s|\\b)(#(\\w+))\\b");
+        Matcher matcher = pattern.matcher(message);
+
+        final SpannableStringBuilder sb = new SpannableStringBuilder(message);
+        final ForegroundColorSpan fcs = new ForegroundColorSpan(Color.RED);
+
+        // Span to set text color to some RGB value
+        final StyleSpan bss = new StyleSpan(android.graphics.Typeface.BOLD);
+
+        // Check all occurrences
+        while (matcher.find()) {
+            int start = matcher.start();
+            int end = matcher.end();
+
+            // Span to make text bold
+            sb.setSpan(fcs, start, end, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+
+            // Set the text color for first 4 characters
+            sb.setSpan(bss, start, end, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+        }
+
+        return sb;
     }
 
     public Bitmap decodeToBitmap(byte[] decodedByte) {

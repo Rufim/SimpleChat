@@ -22,6 +22,7 @@ import com.simplechat.client.net.Client;
 import java.net.Socket;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * Created by Rufim
@@ -40,7 +41,7 @@ public class ChatFragment extends Fragment {
     private EditText chatText;
     private Button buttonSend;
     private Thread chatRunningTask;
-    private String user = "DefUser";
+    private String user = "User_" + getRandomString(3);
     private Handler handler;
 
     private Client client;
@@ -124,6 +125,16 @@ public class ChatFragment extends Fragment {
             }
         });
         return rootView;
+    }
+
+    public String getRandomString(int length) {
+        Random rng = new Random(System.currentTimeMillis());
+        char[] chars = new char[length];
+        String validChars = "abcdefghijklmnopqrstuvwxyz ABCEDFGHIJKLMNOPQRSTUVWXYZ1234567890";
+        for (int i = 0; i < length; i++) {
+            chars[i] = validChars.charAt(rng.nextInt(validChars.length()));
+        }
+        return new String(chars);
     }
 
     @Override
